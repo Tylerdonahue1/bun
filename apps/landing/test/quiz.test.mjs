@@ -1,0 +1,12 @@
+import test from 'node:test'; import assert from 'node:assert';
+import { QUESTIONS, TYPES, score } from '../lib/quiz.js';
+const pick = ids => Object.fromEntries(QUESTIONS.map((q, i) => [q.id, ids[i]]));
+test('8 questions, every option scores into a real type', () => { assert.equal(QUESTIONS.length, 8); for (const q of QUESTIONS) for (const o of q.opts) for (const k of Object.keys(o.s)) assert.ok(TYPES[k], k); });
+test('flash fry', () => assert.equal(score(pick(['volcano', 'tone', 'car', 'now', 'makeup', 'minutes', 'new', 'no'])).type, 'flash'));
+test('pressure cooker', () => assert.equal(score(pick(['ghost', 'inlaws', 'random', 'space', 'silent', 'days', 'hits', 'no'])).type, 'pressure'));
+test('slow simmer', () => assert.equal(score(pick(['lawyer', 'dishes', 'night', 'neither', 'drop', 'sleep', 'same', 'loud'])).type, 'simmer'));
+test('sweet & sour', () => assert.equal(score(pick(['ghost', 'phones', 'text', 'mismatch', 'caves', 'hours', 'hits', 'no'])).type, 'sweetsour'));
+test('souffle', () => assert.equal(score(pick(['lawyer', 'money', 'text', 'now', 'resolve', 'hours', 'hits', 'skip'])).type, 'souffle'));
+test('unsafe answer: no type, safety answer never kept', () => { const s = score(pick(['volcano', 'tone', 'car', 'now', 'makeup', 'minutes', 'new', 'yes'])); assert.equal(s.unsafe, true); assert.equal(s.type, null); assert.ok(!('safe' in s.clean)); });
+test('junk answers are dropped', () => { const s = score({ style: '<script>', trigger: 'dishes', evil: 'x' }); assert.deepEqual(s.clean, { trigger: 'dishes' }); assert.equal(s.valid, false); });
+test('all reachable types', () => { const seen = new Set(); const rec = (i, a) => { if (i === 7) { seen.add(score(a).type); return; } for (const o of QUESTIONS[i].opts) rec(i + 1, { ...a, [QUESTIONS[i].id]: o.id }); }; rec(0, {}); assert.deepEqual([...seen].sort(), Object.keys(TYPES).sort()); });

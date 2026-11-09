@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bun: the fight coach for couples · Simmer</title>
+<meta name="description" content="Bun is a warm, neutral AI coach that helps couples cool down, talk it through, and make up. Take the 60-second quiz: what kind of fighters are you two?">
+<meta property="og:title" content="What kind of fighters are you two?">
+<meta property="og:description" content="A 60-second, very unscientific quiz from Bun, the couples fight coach. Flash Fry? Slow Simmer? Find out.">
+<meta property="og:url" content="https://bun.coach/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#FFF4E6">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..900,100,1&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script type="module" src="/analytics.js"></script>
+</head>
+<body>
+<a class="sr skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="logo" href="/" aria-label="Simmer home"><span class="bun-mini" data-bun="28"></span><b>Simmer</b><span class="dot">·</span><span class="muted">with Bun</span></a>
+  <button class="btn sm primary" data-start>Take the quiz</button>
+</header>
+
+<main id="main">
+<!-- LANDING -->
+<div id="landing">
+  <section class="hero">
+    <div id="shared-banner" class="shared" hidden></div>
+    <p class="eyebrow">It’s 11:42pm. You’re both right. Now what?</p>
+    <h1 class="h1">Bun breaks up your fights.<br><em>Not your relationship.</em></h1>
+    <p class="lede">Bun is a warm little AI coach that shows up mid-fight, cools you both down, and helps you actually talk. Never picks a side. Never says “calm down.”</p>
+    <div class="hero-bun" data-bun="150" data-mood="happy"></div>
+    <button class="btn big fight" data-start>What kind of fighters are you two? <span aria-hidden="true">→</span></button>
+    <p class="fine center-t">60 seconds · 8 questions · zero judgment</p>
+  </section>
+
+  <section class="sec">
+    <p class="eyebrow">How it works</p>
+    <h2 class="h2">One tap. Three steps. Back to being on the same team.</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><div><b>Wind down</b><p>Hit Pause. Bun talks you both down: sit still together, walk it off, or answer a few private questions apart.</p></div></li>
+      <li><span class="num">2</span><div><b>Talk it through</b><p>Timed turns. Bun reflects each side back (“from your side…”) so the other person actually hears it.</p></div></li>
+      <li><span class="num">3</span><div><b>Seal it</b><p>One small agreement you both write, plus a repair. Saved, so next time you start there, not from scratch.</p></div></li>
+    </ol>
+    <div class="fork card"><p class="muted">The app opens with one question:</p><p class="fork-q">“Are we in a fight, or just here to chill?”</p><p class="muted">Chill mode has reminders, your agreements, and little daily gesture ideas.</p></div>
+  </section>
+
+  <section class="sec two">
+    <div class="card is"><h3>Bun is…</h3><ul><li>There at 11pm, when the fight actually happens</li><li>Neutral. Always. The loop is the problem, not either of you.</li><li>Warm, a little playful, never preachy</li><li>For couples who are basically good and want to fight better</li></ul></div>
+    <div class="card isnt"><h3>Bun isn’t…</h3><ul><li>Therapy, or a therapist</li><li>A referee who declares a winner</li><li>Something that diagnoses you or your partner</li><li>For situations where someone feels unsafe. <a href="#help">Get real help here.</a></li></ul></div>
+  </section>
+
+  <section class="sec price card">
+    <p class="eyebrow">Early access pricing</p>
+    <p class="big-price">$14.99<small>/mo</small> <span class="or">or</span> $119.99<small>/yr</small></p>
+    <ul class="ticks"><li>Your partner joins free</li><li>Fight mode is always free</li><li>A whole year costs less than one couples counseling session ($141 to $175 without insurance*)</li></ul>
+    <button class="btn big primary" data-start>Take the quiz & join early access</button>
+    <p class="fine">*Average couples session without insurance: $141 (DatingNews survey, 2025), $152 (Synchrony cost study, 2025), about $175 (Real Cost Report, 2026).</p>
+  </section>
+
+  <section class="sec center-t">
+    <p class="muted">Curious? Poke the work-in-progress app.</p>
+    <a class="link" href="/app/">Try the prototype →</a>
+  </section>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" hidden>
+  <div class="quiz-top"><button class="icon" id="back" aria-label="Back">←</button><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0"><span id="bar"></span></div><span class="fine" id="count">1/8</span></div>
+  <div id="qbody" tabindex="-1"></div>
+</div>
+
+<!-- LEAD FORM -->
+<div id="lead" hidden>
+  <div class="say">
+    <span data-bun="64" data-mood="happy"></span>
+    <p class="bubble">Ooh, I know your type already. Want early access when Bun launches?</p>
+  </div>
+  <form id="lead-form" class="card stack" novalidate>
+    <label class="fld"><span>Email <i>(required)</i></span><input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@example.com"></label>
+    <label class="fld"><span>First name <i>(optional)</i></span><input type="text" name="firstName" autocomplete="given-name" maxlength="60" placeholder="So Bun can say hi"></label>
+    <fieldset class="fld"><legend>Would your partner join too? <i>(optional)</i></legend>
+      <div class="seg"><label><input type="radio" name="partner" value="yes"><span>Yes, both of us</span></label><label><input type="radio" name="partner" value="maybe"><span>Maybe</span></label><label><input type="radio" name="partner" value="solo"><span>Just me for now</span></label></div>
+    </fieldset>
+    <label class="hp" aria-hidden="true">Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    <label class="check"><input type="checkbox" name="consent" required><span>Keep me posted about early access to Simmer. Unsubscribe anytime.</span></label>
+    <p class="err" id="lead-err" role="alert" hidden></p>
+    <button class="btn big fight" type="submit" id="lead-submit">Join & show our type</button>
+    <p class="fine">We store your email and quiz answers to send early-access updates and improve Bun. Never sold, never shared. Your answer to the safety question is never saved.</p>
+  </form>
+  <button class="link center-self" id="skip-lead">Skip, just show me</button>
+</div>
+
+<!-- RESULT -->
+<div id="result" hidden></div>
+
+<!-- SAFETY -->
+<div id="safety" hidden>
+  <section class="card safe">
+    <span data-bun="72" data-mood="soft"></span>
+    <h2 class="h2">Thank you for telling us. That matters more than any quiz.</h2>
+    <p>Feeling scared or unsafe with a partner isn’t a “fighting style,” and it isn’t your fault. Bun is a coaching tool for everyday fights, so it isn’t the right help here. These people are, any time, for free, confidentially:</p>
+    <ul class="hotlines">
+      <li><b>In danger right now?</b> Call <a href="tel:911">911</a>.</li>
+      <li><b>National Domestic Violence Hotline</b>, 24/7: call <a href="tel:18007997233">1-800-799-7233</a>, or text START to <a href="sms:88788?&body=START">88788</a>, or chat at <a href="https://www.thehotline.org/" target="_blank" rel="noopener">thehotline.org</a>.</li>
+      <li><b>988 Suicide & Crisis Lifeline</b>: call or text <a href="tel:988">988</a>.</li>
+    </ul>
+    <p class="fine">If someone might check your phone, the hotline sites have safety tips, and you can clear this page from your history.</p>
+    <div class="row"><a class="btn calm" href="https://www.thehotline.org/" target="_blank" rel="noopener">Talk to someone</a><a class="btn ghost" href="https://www.google.com/" rel="noreferrer">Leave this page quickly</a></div>
+  </section>
+  <button class="link center-self" id="safety-home">Back to the home page</button>
+</div>
+</main>
+
+<footer class="foot" id="help">
+  <p><b>Simmer is relationship coaching, not therapy</b>, and not for emergencies. Bun doesn’t diagnose anyone.</p>
+  <p>If you’re in danger, call <a href="tel:911">911</a>. National Domestic Violence Hotline: <a href="tel:18007997233">1-800-799-7233</a> (text START to 88788). Suicide & Crisis Lifeline: call or text <a href="tel:988">988</a>.</p>
+  <p class="fine"><b>Privacy:</b> if you join, we keep your email, optional first name, and quiz answers to send you updates and improve Bun. We don’t sell or share them, and we never save the safety question. Want yours deleted? Ask us anytime and we’ll remove it. We use privacy-friendly, cookie-free page analytics.</p>
+  <p class="fine">© 2026 Simmer · bun.coach</p>
+</footer>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

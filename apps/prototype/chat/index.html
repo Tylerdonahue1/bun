@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simmer · Chat version (live prototype)</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFF4E6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..900,100,1&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/shared/simmer.css">
+<link rel="stylesheet" href="live.css">
+<script type="module" src="/analytics.js"></script>
+</head>
+<body>
+<a class="skip" href="#app">Skip to the prototype</a>
+<div class="stage">
+  <aside class="panel" aria-label="About this prototype">
+    <div class="panel-brand"><span class="panel-bun" aria-hidden="true"></span><div><p class="panel-name">Bun, in your chat</p><p class="panel-sub">Simmer · live AI prototype</p></div></div>
+    <div id="panel-info"></div>
+  </aside>
+  <main class="device-wrap">
+    <div class="phone" id="phone">
+      <div class="notch" aria-hidden="true"></div>
+      <div id="app" class="app" tabindex="-1"></div>
+      <div id="tm" class="tmode" hidden></div>
+      <button class="quick-exit" id="quick-exit" type="button" hidden aria-label="Quick exit: leave now and open a weather page">Quick exit</button>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+  </main>
+</div>
+<div id="vswitch"></div>
+<script src="/shared/simmer.js"></script>
+<script src="/shared/speech.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

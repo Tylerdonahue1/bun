@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "redirects": [
+    { "source": "/", "destination": "https://bun.coach/app/", "permanent": true },
+    { "source": "/:path*", "destination": "https://bun.coach/:path*", "permanent": true }
+  ]
+}

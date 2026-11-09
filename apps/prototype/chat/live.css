@@ -1,0 +1,35 @@
+/* live-prototype additions on top of the original group-chat styles */
+.av.A{background:var(--hueA);color:#fff}.av.B{background:var(--hueB);color:#fff}
+.m.me.pA .b{background:var(--hueA);color:#fff}.m.me.pB .b{background:var(--hueB);color:#fff}
+.m.them.pA .b{background:var(--hueA-soft)}.m.them.pB .b{background:var(--hueB-soft)}
+.m.pA .who{color:var(--hueA)}.m.pB .who{color:var(--hueB)}
+.m.bun .b{border-color:var(--hueBun)}.m .who.bunname{color:var(--hueBun)}
+.typing.pA .dots i{background:var(--hueA)}.typing.pB .dots i{background:var(--hueB)}
+.as-pill.pA{border-color:var(--hueA);color:var(--hueA)}.as-pill.pB{border-color:var(--hueB);color:var(--hueB)}
+.record{margin:6px 0 0;font-size:13.5px;font-weight:800;padding:5px 10px;border-radius:10px;display:inline-block}
+.record.rA{background:var(--hueA-soft);color:#7A3815}.record.rB{background:var(--hueB-soft);color:#174257}
+.card.cool .record{display:block}
+.invite-bar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13.5px;padding:7px 10px;background:var(--butter-2);border-bottom:1px solid var(--line)}
+.invite-bar span{font-weight:700;flex:1 1 100%}
+.invite-bar button,.invite-bar a{min-height:34px;border-radius:999px;border:2px solid var(--ink);background:var(--card);font:800 13px var(--body);padding:0 12px;display:inline-flex;align-items:center;color:var(--ink);text-decoration:none;cursor:pointer}
+.tm-jot{display:flex;gap:6px;align-items:center;width:100%;max-width:420px}
+.tm-icon[data-tg="mic"][aria-pressed="true"]{background:var(--hueBun,#1D5E5A);color:#fff}
+.tm-jot textarea{font-size:15px;min-height:52px;resize:none}
+.tm-records{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:420px}
+.tm-btn.pA{background:var(--hueA)}.tm-btn.pB{background:var(--hueB)}
+.tm-half.pA .tm-name{color:var(--hueA)}.tm-half.pB .tm-name{color:var(--hueB)}
+.tm-half.pA .tm-token{background:var(--hueA-soft)}.tm-half.pB .tm-token{background:var(--hueB-soft)}
+.tm-safety{display:grid;gap:10px;justify-items:center;max-width:420px;text-align:center}
+.tm-safety .res{text-align:left;width:100%}
+.panel-note{color:var(--ink-2)}
+.thread .card{animation:none}
+.channel{text-align:left}
+/* Together 20:00 break: slow breathing ring (in 4s, hold 1s, out 5s) */
+.tm-breathe{animation:breathe 10s ease-in-out infinite}
+@keyframes breathe{0%{transform:scale(.9)}40%{transform:scale(1.06)}50%{transform:scale(1.06)}100%{transform:scale(.9)}}
+@media (prefers-reduced-motion:reduce){.tm-breathe{animation:none}}
+/* two-phone demo: each iframe is one device */
+body.duo #vswitch,body.duo .demo-fab,body.duo .as-pill{display:none!important}
+.duo-link{font-weight:800;color:var(--ink)}
+/* markdown in bubbles */
+.m .b i{font-style:italic}.m .b b{font-weight:800}

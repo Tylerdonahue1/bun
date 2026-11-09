@@ -1,0 +1,23 @@
+{
+  "name": "bun-coach-landing",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node dev-server.mjs 4400",
+    "sync-analytics": "node scripts/sync-analytics.mjs",
+    "postinstall": "node scripts/sync-analytics.mjs",
+    "test": "node --experimental-vm-modules --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.2.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.8.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "resend": "^6.37.0"
+  }
+}

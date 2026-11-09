@@ -1,0 +1,11 @@
+{
+  "name": "Simmer",
+  "short_name": "Simmer",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "background_color": "#FFF4E6",
+  "theme_color": "#FFF4E6",
+  "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }],
+  "shortcuts": [{ "name": "Pause (we're in a fight)", "short_name": "Pause", "url": "/app/?pause=1" }]
+}
