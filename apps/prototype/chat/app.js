@@ -313,8 +313,14 @@ setInterval(() => { tickTimers(); renderTyping(); if (T.on) tickT(); }, 1000);
 const RING_C = 2 * Math.PI * 46;
 const T = { on:false, screen:'home', speaker:'A', round:1, left:120, total:120, running:false, said:'', heard:'', cap:'', speaking:false, sound:false, log:[], tok:0 };
 function enterTogether() { T.on = true; T.screen = 'home'; T.log = []; T.round = 1; T.speaker = S.me; $('#tm').hidden = false; renderT(); sayT(`Put one phone between you. I’ll keep time and keep it fair.`); }
-function exitTogether() { T.on = false; T.running = false; T.tok++; if ('speechSynthesis' in window) speechSynthesis.cancel(); $('#tm').hidden = true; }
-function sayT(text) { text = plain(text); T.cap = text; T.speaking = true; paintCap(); if (T.sound && 'speechSynthesis' in window) { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = .95; u.onend = () => { T.speaking = false; paintCap(); }; speechSynthesis.speak(u); } else setTimeout(() => { T.speaking = false; paintCap(); }, Math.min(6000, 600 + text.split(' ').length * 260)); }
+function exitTogether() { T.on = false; T.running = false; T.tok++; stopMic(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('#tm').hidden = true; }
+function sayT(text) {
+  text = plain(text); T.cap = text;
+  if (micSession && micSession.listening) { T.speaking = false; paintCap(); return; } // captions only while the mic is open
+  T.speaking = true; paintCap();
+  if (T.sound && 'speechSynthesis' in window) { if (window.SimmerSpeech) SimmerSpeech.hush(speechSynthesis); else speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = .95; u.onend = () => { T.speaking = false; paintCap(); }; speechSynthesis.speak(u); }
+  else setTimeout(() => { T.speaking = false; paintCap(); }, Math.min(6000, 600 + text.split(' ').length * 260));
+}
 function paintCap() { $$('#tm .tm-cap').forEach(e => e.textContent = T.cap); $$('#tm .tm-wave').forEach(e => e.classList.toggle('on', T.speaking)); $$('#tm .tm-speaking').forEach(e => e.textContent = T.thinking ? 'Bun is listening back…' : T.speaking ? 'Bun is speaking' : 'Bun'); }
 async function aiT(step, instruction, fallback) {
   const tok = ++T.tok; T.thinking = true; T.cap = ''; paintCap();
@@ -333,7 +339,7 @@ function tickT() {
   T.left = Math.max(0, T.left - 1);
   $$('#tm .tm-ring .prog').forEach(c => c.style.strokeDashoffset = RING_C * (1 - T.left / T.total));
   $$('#tm .tm-time').forEach(e => e.textContent = mmss(T.left));
-  if (!T.left) { T.running = false; if (T.screen === 'turn') { sayT(`Time. ${N(T.speaker)}, finish your sentence, then pass.`); renderT(); } else if (T.screen === 'pause') { T.screen = 'home'; renderT(); sayT('Welcome back. Ready when you are.'); } }
+  if (!T.left) { T.running = false; if (T.screen === 'turn') { stopMic(); sayT(`Time. ${N(T.speaker)}, finish your sentence, then pass.`); renderT(); } else if (T.screen === 'pause') { T.screen = 'home'; renderT(); sayT('Welcome back. Ready when you are.'); } }
 }
 const ring = (inner, cls = '') => `<svg class="tm-ring ${cls}" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" class="trk"/><circle cx="50" cy="50" r="46" class="prog" style="stroke-dasharray:${RING_C};stroke-dashoffset:${RING_C * (1 - T.left / T.total)}"/></svg>${inner}`;
 const BIGB = (tg, label, cls = '') => `<button type="button" class="tm-btn ${cls}" data-tg="${tg}">${label}</button>`;
@@ -344,9 +350,44 @@ function stage(size = 100, mood = 'talk', fill) {
 const half = (w, inner) => `<section class="tm-half ${w === T.speaker ? 'near' : 'far'} p${w}" aria-label="${esc(N(w))}’s side">${inner}</section>`;
 const midBar = () => `<div class="tm-mid"><div class="tm-wave sm ${T.speaking ? 'on' : ''}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p class="tm-cap" aria-live="polite">${esc(T.cap)}</p></div>`;
 const split = (near, far) => half(other(T.speaker), far) + midBar() + half(T.speaker, near);
-const mic = id => ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) ? `<button type="button" class="tm-icon" data-tg="mic" data-for="${id}" aria-label="Dictate">🎤</button>` : '';
+const mic = id => (window.SimmerSpeech && (window.SpeechRecognition || window.webkitSpeechRecognition))
+  ? `<button type="button" class="tm-icon" data-tg="mic" data-for="${id}" aria-pressed="false" aria-label="Dictate">🎤</button>`
+  : '<p class="tm-hint">Voice typing isn’t available in this browser. Type instead.</p>';
 const records = () => T.log.filter(l => l.rec).map(l => `<p class="record r${l.who}">${esc(l.text)}</p>`).join('');
+let micSession = null, micGen = 0;
+function stopMic() {
+  micGen += 1; const current = micSession; micSession = null;
+  if (current) current.stop();
+  $$('#tm [data-tg="mic"]').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Dictate'); });
+}
+function startMic(id, button) {
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!window.SimmerSpeech || !Rec) { toast(window.SimmerSpeech ? SimmerSpeech.NOTES.unsupported : 'Voice typing isn’t available in this browser. Type instead.'); return; }
+  stopMic();
+  const my = ++micGen;
+  const field = $('#' + id); if (field) field.blur();
+  const base = field && field.value.trim() ? field.value.trim() + ' ' : '';
+  if (window.SimmerSpeech) SimmerSpeech.hush(window.speechSynthesis);
+  T.speaking = false; paintCap();
+  const mine = SimmerSpeech.createSession({
+    Rec, synth: window.speechSynthesis, keep: true,
+    onText(t) {
+      if (my !== micGen) return;
+      const ta = $('#' + id); if (!ta) return;
+      const next = base + t; ta.value = next;
+      if (id === 'said') T.said = next; else T.heard = next;
+    },
+    onState(state) {
+      if (my !== micGen) return;
+      if (button) { button.setAttribute('aria-pressed', state === 'listening' ? 'true' : 'false'); button.setAttribute('aria-label', state === 'listening' ? 'Listening, tap to stop' : 'Dictate'); }
+      if (state !== 'listening' && state !== 'idle' && SimmerSpeech.NOTES[state]) toast(SimmerSpeech.NOTES[state]);
+    },
+  });
+  micSession = mine;
+  if (!mine.start()) toast(SimmerSpeech.NOTES.failed);
+}
 function renderT() {
+  stopMic();
   const el = $('#tm'); if (!T.on) return;
   const sp = T.speaker, li = other(sp);
   const top = `<div class="tm-top"><div class="tm-modes" role="group" aria-label="Mode"><button type="button" data-tg="apart" aria-pressed="false">Apart</button><button type="button" aria-pressed="true">Together</button><button type="button" data-tg="solo" aria-pressed="false">Solo</button></div>
@@ -374,12 +415,6 @@ function renderT() {
   el.innerHTML = top + `<div class="tm-body ${cls} enter">${body}</div>`;
 }
 function startTurn() { T.screen = 'turn'; T.left = T.total = 120; T.running = false; T.said = ''; renderT(); sayT(`${N(T.speaker)}, you talk. ${N(other(T.speaker))}, you listen. Tap the token to start.`); }
-const recog = id => {
-  const R = window.SpeechRecognition || window.webkitSpeechRecognition; if (!R) return;
-  const r = new R(); r.lang = 'en-US'; r.interimResults = true;
-  r.onresult = e => { const t = [...e.results].map(x => x[0].transcript).join(' '); const ta = $('#' + id); if (ta) { ta.value = t; if (id === 'said') T.said = t; else T.heard = t; } };
-  r.start(); toast('Listening… speak, then pause.');
-};
 $('#tm').addEventListener('input', e => { if (e.target.id === 'said') T.said = e.target.value; if (e.target.id === 'heard') T.heard = e.target.value; });
 $('#tm').addEventListener('click', e => {
   const b = e.target.closest('[data-tg]'); if (!b) return;
@@ -391,7 +426,7 @@ $('#tm').addEventListener('click', e => {
     talk: () => { T.round = 1; T.screen = 'who'; renderT(); sayT('Who wants to go first?'); },
     'first-A': () => { T.speaker = 'A'; startTurn(); }, 'first-B': () => { T.speaker = 'B'; startTurn(); },
     token: () => { T.running = !T.running; renderT(); },
-    mic: () => recog(b.dataset.for),
+    mic: () => { if (b.getAttribute('aria-pressed') === 'true') stopMic(); else startMic(b.dataset.for, b); },
     pass: () => {
       T.running = false; const said = T.said.trim();
       T.log.push({ from:sp, text:said || '(said it out loud, no notes)' });

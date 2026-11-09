@@ -46,6 +46,8 @@ h3{font-family:var(--display);font-size:22px;margin:4px 0 8px}
 .btn.danger{color:var(--tomato-hi);border-color:var(--tomato-hi)}
 .btn.mic{background:var(--card);border-color:var(--cool);color:var(--cool)}
 .btn.mic.on{background:var(--cool);color:#fff;animation:pulse 1.2s ease-in-out infinite}
+.mic-note{margin:0;font-size:14.5px;font-weight:700;color:var(--cool)}
+.mic-note.warn{color:var(--tomato-hi)}
 @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(29,94,90,.18)}}
 .btn.huge{min-height:96px;border-radius:28px;justify-content:flex-start;padding:16px 20px;text-align:left;width:100%}
 .btn.huge b{display:block;font-family:var(--display);font-size:27px;line-height:1.05}

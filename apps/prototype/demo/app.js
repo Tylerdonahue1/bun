@@ -954,7 +954,7 @@ function consentGate() {
 const V = (() => {
   const ok = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   const RecCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let voice = null, unlocked = false, rec = null, tok = 0;
+  let voice = null, unlocked = false, rec = null, tok = 0, session = null, listenGen = 0;
   const pickVoice = () => { if (!ok) return; const vs = speechSynthesis.getVoices(); voice = vs.find(v => /Samantha|Ava|Allison|Google US English|Microsoft (Aria|Jenny)/i.test(v.name)) || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null; };
   if (ok) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch {} }
   const wave = on => { api.busy = on; $$('.fx-wave').forEach(e => e.classList.toggle('on', on)); };
@@ -962,11 +962,12 @@ const V = (() => {
     ok, canListen: !!RecCtor, busy: false, started: false,
     // iOS/Safari only allow speech after a user gesture: speak a silent utterance on the first tap.
     unlock() { if (!ok || unlocked) return; unlocked = true; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch {} },
-    cancel() { tok++; if (ok) { try { speechSynthesis.cancel(); } catch {} } wave(false); api.stopListen(); },
+    cancel() { tok++; if (ok && window.SimmerSpeech) SimmerSpeech.hush(speechSynthesis); wave(false); api.stopListen(); },
     speak(text, onend) {
       const t = String(text || '').replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim(); const my = ++tok;
       let ended = false; const fin = () => { if (ended) return; ended = true; if (my === tok) wave(false); onend && onend(); };
       const words = t.split(' ').length;
+      if (session && session.listening) { fin(); return false; }
       if (!ok || !S.voice || !t) { if (t) { wave(true); setTimeout(fin, Math.min(7000, 700 + words * 260)); } else fin(); api.started = false; return false; }
       try { speechSynthesis.cancel(); } catch {}
       const u = new SpeechSynthesisUtterance(t); if (voice) u.voice = voice; u.lang = voice?.lang || 'en-US'; u.rate = .94; u.pitch = 1.04;
@@ -977,18 +978,22 @@ const V = (() => {
       return true;
     },
     listen(onText, onEnd) {
-      if (!RecCtor) return false; api.cancel();
-      try { rec = new RecCtor(); } catch { return false; }
-      rec.lang = 'en-US'; rec.interimResults = true; rec.maxAlternatives = 1; let fin = '';
-      rec.onresult = e => { let interim = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; } onText((fin + interim).trim()); };
-      rec.onerror = () => {}; rec.onend = () => { rec = null; onEnd && onEnd(fin.trim()); };
-      try { rec.start(); } catch { rec = null; return false; } return true;
+      if (!RecCtor || !window.SimmerSpeech) return false;
+      api.stopListen(true);
+      const my = ++listenGen;
+      if (ok) SimmerSpeech.hush(speechSynthesis);
+      wave(false);
+      session = SimmerSpeech.createSession({
+        Rec: RecCtor, synth: ok ? speechSynthesis : null, keep: true, onText,
+        onEnd: text => { if (my !== listenGen) return; session = null; onEnd && onEnd(text); },
+      });
+      return session.start();
     },
-    stopListen() { try { rec && rec.stop(); } catch {} rec = null; },
+    stopListen(silent = false) { if (silent) listenGen += 1; const current = session; session = null; rec = null; if (current) current.stop(); },
   };
   return api;
 })();
-document.addEventListener('click', () => V.unlock(), true);
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-fa="mic"]')) return; V.unlock(); }, true);
 const toSpeech = html => { const d = document.createElement('div'); d.innerHTML = String(html || '').replace(/<(br|\/p|\/li)\b[^>]*>/gi, ' $&'); return d.textContent.replace(/\s+/g, ' ').trim(); };
 
 const F = { mode:'', who:'A', i:0, ans:{A:{}, B:{}}, plan:{A:null, B:null}, line:{A:'', B:''}, done:{A:false, B:false}, ready:{A:false, B:false}, lock:{A:false, B:false}, mins:{sit:4, walk:10}, logged:false, extra:0 };

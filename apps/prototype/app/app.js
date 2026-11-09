@@ -21,7 +21,7 @@ const toast = (t, ms = 3200) => { const el = $('#toast'); el.textContent = t; el
 const V = (() => {
   const ok = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let voice = null, rec = null, tok = 0;
+  let voice = null, tok = 0;
   const pick = () => { if (!ok) return; const vs = speechSynthesis.getVoices(); voice = vs.find(v => /Samantha|Ava|Allison|Google US English|Microsoft (Aria|Jenny)/i.test(v.name)) || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null; };
   if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch {} }
   const wave = on => $$('.bun-av').forEach(e => e.classList.toggle('talking', on));
@@ -29,7 +29,7 @@ const V = (() => {
     ok, canListen: !!Rec, unlocked: false, listening: false,
     // iPhone Safari only allows speech after a tap: speak a silent utterance inside the first tap.
     unlock() { if (!ok || api.unlocked) return; api.unlocked = true; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch {} },
-    cancel() { tok++; if (ok) { try { speechSynthesis.cancel(); } catch {} } wave(false); },
+    cancel() { tok++; if (ok && window.SimmerSpeech) SimmerSpeech.hush(speechSynthesis); wave(false); },
     speak(text, onend) {
       const t = String(text || '').replace(/[*_]/g, '').replace(/\s+/g, ' ').trim(); const my = ++tok;
       let done = false; const fin = () => { if (done) return; done = true; if (my === tok) wave(false); onend && onend(); };
@@ -41,24 +41,60 @@ const V = (() => {
       setTimeout(fin, Math.min(25000, 2000 + t.split(' ').length * 480)); // some browsers never fire onend
       return true;
     },
-    // Must be called from a tap (iPhone requirement). Streams the transcript into onText.
-    listen(onText, onEnd) {
-      if (!Rec) return false; api.cancel(); api.stop();
-      try { rec = new Rec(); } catch { return false; }
-      rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1; let fin = '';
-      rec.onresult = e => { let interim = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; } onText((fin + interim).trim()); };
-      rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Microphone is blocked. You can type instead, or allow it in your browser settings.'); };
-      rec.onend = () => { rec = null; api.listening = false; micUI(); onEnd && onEnd(fin.trim()); };
-      try { rec.start(); api.listening = true; } catch { rec = null; return false; }
-      micUI(); return true;
+    // Must be called from a tap (iPhone requirement). keep=true stays on across pauses
+    // and writes interim words into onText. keep=false is one phrase (the fork).
+    listen(onText, onEnd, keep = true) {
+      const notes = window.SimmerSpeech && SimmerSpeech.NOTES;
+      if (!Rec || !window.SimmerSpeech) { api.micNote = notes ? notes.unsupported : 'Voice typing isn’t available in this browser. Type instead.'; api.micWarn = true; micUI(); return false; }
+      gen += 1; const my = gen;
+      const previous = session; session = null;
+      api.listening = false;
+      if (previous) previous.stop();
+      api.cancel();
+      const mine = SimmerSpeech.createSession({
+        Rec, synth: ok ? window.speechSynthesis : null, keep: keep !== false,
+        onText,
+        onState: state => {
+          if (my !== gen) return;
+          api.listening = state === 'listening';
+          api.micNote = notes[state] || '';
+          api.micWarn = state !== 'listening' && state !== 'idle' && !!api.micNote;
+          micUI();
+        },
+        onEnd: (text, state) => {
+          if (my !== gen) return;
+          if (session === mine) session = null;
+          api.listening = false; micUI();
+          onEnd && onEnd(text, state);
+        },
+      });
+      session = mine;
+      return mine.start();
     },
-    stop() { try { rec && rec.stop(); } catch {} },
+    stop() {
+      const current = session; session = null;
+      api.listening = false; api.micNote = ''; api.micWarn = false;
+      if (current) current.stop();
+      micUI();
+    },
   };
+  let session = null, gen = 0;
+  api.micNote = ''; api.micWarn = false;
   return api;
 })();
-document.addEventListener('pointerdown', () => V.unlock(), true);
-document.addEventListener('click', () => V.unlock(), true);
-const micUI = () => $$('[data-act="mic"]').forEach(b => { b.classList.toggle('on', V.listening); b.setAttribute('aria-pressed', String(V.listening)); const l = b.querySelector('.ml'); if (l) l.textContent = V.listening ? 'Listening… tap to stop' : 'Talk'; });
+const micGesture = e => e.target.closest && e.target.closest('[data-act="mic"], [data-act="fork-listen"]');
+document.addEventListener('pointerdown', e => { if (!micGesture(e)) V.unlock(); }, true);
+document.addEventListener('click', e => { if (!micGesture(e)) V.unlock(); }, true);
+const micUI = () => {
+  $$('[data-act="mic"], [data-act="fork-listen"]').forEach(b => {
+    const on = V.listening;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    const label = b.querySelector('.ml'); if (!label) return;
+    if (b.dataset.act === 'fork-listen') label.textContent = on ? 'Listening… tap to stop' : 'Or just say it';
+    else label.textContent = on ? 'Listening… tap to stop' : 'Talk';
+  });
+  $$('[data-mic-status]').forEach(p => { p.textContent = V.micNote || ''; p.hidden = !V.micNote; p.classList.toggle('warn', !!V.micWarn); });
+};
 
 /* ---------------- bits ---------------- */
 function bun(size = 96, mood = 'happy') {
@@ -84,7 +120,8 @@ const fightTop = (back = 'fork', label = 'Exit') => `<div class="topbar"><button
 const stagebar = n => `<ol class="stages" aria-label="Fight mode, stage ${n} of 3">${['Wind down', 'Talk it through', 'Seal it'].map((t, i) => `<li class="${i + 1 < n ? 'done' : i + 1 === n ? 'now' : ''}" ${i + 1 === n ? 'aria-current="step"' : ''}><b>${i + 1 < n ? '✓' : i + 1}</b>${t}</li>`).join('')}</ol>`;
 const helpLink = () => `<p class="help-row">Scared, or not safe right now? <a class="help-link" href="#/help">Get help privately</a></p>`;
 const micBtn = (target) => V.canListen ? `<button type="button" class="btn mic" data-act="mic" data-target="${target}" aria-pressed="false">${I.mic}<span class="ml">Talk</span></button>` : '';
-const inputBox = (id, ph, rows = 3) => `<div class="inbox"><label class="sr" for="${id}">${esc(ph)}</label><textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}" maxlength="1200"></textarea><div class="inrow">${micBtn(id)}<button type="button" class="btn primary" data-act="submit" data-target="${id}">Done</button></div>${V.canListen ? '' : '<p class="fine">Voice typing isn’t available in this browser. Type instead.</p>'}</div>`;
+const micNote = () => V.canListen ? '<p class="mic-note" data-mic-status hidden></p>' : '<p class="mic-note">Voice typing isn’t available in this browser. Type instead.</p>';
+const inputBox = (id, ph, rows = 3) => `<div class="inbox"><label class="sr" for="${id}">${esc(ph)}</label><textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}" maxlength="1200"></textarea><div class="inrow">${micBtn(id)}<button type="button" class="btn primary" data-act="submit" data-target="${id}">Done</button></div>${micNote()}</div>`;
 
 /* ---------------- safety: a flag applies to that one message ---------------- */
 const safetyHit = ret => { V.cancel(); V.stop(); S.safeRet = ret || 'fork'; save(); go('help'); };
@@ -358,7 +395,8 @@ ${z.repair === 'Something else' ? `<input name="repairOther" maxlength="50" plac
 ${z.repair ? `<div class="doit ${z.repairDone ? 'on' : ''}"><p>${z.repairDone ? '✓ Done. That counts.' : 'Do it now. I’ll wait.'}</p>${z.repairDone ? '' : '<button type="button" class="btn calm sm" data-act="repair-done">We did it</button>'}</div>` : ''}
 </fieldset>
 <fieldset><legend>2 · One agreement for next time</legend>
-<textarea name="agreement" rows="2" maxlength="160" placeholder="We’ll…">${esc(z.agreement || '')}</textarea>
+<textarea id="seal-in" name="agreement" rows="2" maxlength="160" placeholder="We’ll…">${esc(z.agreement || '')}</textarea>
+<div class="inrow">${micBtn('seal-in')}</div>${micNote()}
 <label class="inline">Remind us<select name="remind"><option value="0">No reminder</option><option value="3" ${z.remind == 3 ? 'selected' : ''}>In 3 days</option><option value="7" ${z.remind == 7 || z.remind == null ? 'selected' : ''}>In a week</option></select></label>
 </fieldset>
 <fieldset><legend>3 · What helped tonight? <span>optional</span></legend>
@@ -525,9 +563,12 @@ const A = {
   voice: () => { S.voice = !S.voice; if (!S.voice) V.cancel(); save(); $$('[data-act="voice"]').forEach(b => b.outerHTML = voiceBtn()); },
   'fork-listen': b => {
     if (V.listening) return V.stop();
-    V.listen(t => { const l = b.querySelector('.ml'); if (l) l.textContent = `“${t}”`; }, t => {
-      if (/fight|argu|mad|yell|angry|upset|heated/i.test(t)) fightNow(); else if (/chill|explore|relax|hang|fine|nothing|calm/i.test(t)) go('home'); else if (t) toast('Didn’t catch that. Tap a button instead.');
-    });
+    V.listen(t => { const l = b.querySelector('.ml'); if (l) l.textContent = `“${t}”`; }, (t, state) => {
+      if (/fight|argu|mad|yell|angry|upset|heated/i.test(t)) fightNow();
+      else if (/chill|explore|relax|hang|fine|nothing|calm/i.test(t)) go('home');
+      else if (t) toast('Didn’t catch that. Tap a button instead.');
+      else if (state && SimmerSpeech.NOTES[state]) toast(SimmerSpeech.NOTES[state]);
+    }, false);
   },
   'skip-wind': () => { C.logStage(S, { wind: 'skip' }); S.cur.wind = 'skip'; go('f2'); },
   'solo-start': () => go('fsolo'),
@@ -554,9 +595,15 @@ const A = {
   secs: b => { T().secs = +b.dataset.v; save(); render(); },
   submit: b => { const el = $('#' + b.dataset.target); V.stop(); const v = el.value; if (CUR === 'f2') talkSubmit(v); else if (CUR === 'fsolo') soloText(v); },
   mic: b => {
-    const el = $('#' + b.dataset.target); if (V.listening) return V.stop();
-    const base = el.value ? el.value.trim() + ' ' : '';
-    if (!V.listen(t => { el.value = base + t; }, () => {})) toast('Couldn’t start the microphone. Type instead.');
+    const el = $('#' + b.dataset.target); if (!el) return;
+    if (V.listening) return V.stop();
+    el.blur(); // a focused field takes the mic on iPhone, so the recognizer hears nothing
+    const base = el.value && el.value.trim() ? el.value.trim() + ' ' : '';
+    V.listen(t => {
+      if (!el.isConnected) return;
+      el.value = base + t;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, () => {});
   },
   heard,
   notquite: () => { const t = T(); t.tries++; if (t.tries > 2) { const line = 'Close enough for tonight. You’re both trying, and that counts.'; t.msgs.push({ from: 'bun', text: line }); V.speak(line); return heard(); } t.phase = 'clarify'; const line = `Okay, ${C.nm(S, t.speaker)}. What part didn’t land? Say it in one line.`; t.msgs.push({ from: 'bun', text: line }); save(); render(); V.speak(line); },

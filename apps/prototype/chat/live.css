@@ -13,6 +13,7 @@
 .invite-bar span{font-weight:700;flex:1 1 100%}
 .invite-bar button,.invite-bar a{min-height:34px;border-radius:999px;border:2px solid var(--ink);background:var(--card);font:800 13px var(--body);padding:0 12px;display:inline-flex;align-items:center;color:var(--ink);text-decoration:none;cursor:pointer}
 .tm-jot{display:flex;gap:6px;align-items:center;width:100%;max-width:420px}
+.tm-icon[data-tg="mic"][aria-pressed="true"]{background:var(--hueBun,#1D5E5A);color:#fff}
 .tm-jot textarea{font-size:15px;min-height:52px;resize:none}
 .tm-records{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:420px}
 .tm-btn.pA{background:var(--hueA)}.tm-btn.pB{background:var(--hueB)}
