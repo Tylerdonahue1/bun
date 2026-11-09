@@ -5,7 +5,7 @@
   "engines": { "node": "22.x" },
   "scripts": {
     "build": "node scripts/assemble.mjs",
-    "test": "node --test scripts/assemble.test.mjs && npm test --prefix apps/landing && npm test --prefix apps/prototype"
+    "test": "node --test scripts/assemble.test.mjs apps/legacy-redirect/redirect.test.mjs && npm test --prefix apps/landing && npm test --prefix apps/prototype"
   },
   "dependencies": {
     "@react-email/components": "^1.0.12",
