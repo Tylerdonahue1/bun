@@ -1,0 +1,19 @@
+{
+  "name": "simmer-prototype",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "sync-analytics": "node scripts/sync-analytics.mjs",
+    "postinstall": "node scripts/sync-analytics.mjs",
+    "test": "node --experimental-vm-modules --test test/*.test.mjs",
+    "redteam": "node test/redteam.mjs"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.8.2"
+  }
+}

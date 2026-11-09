@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Simmer · Apart on two phones</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/shared/simmer.css">
+<style>
+  html,body{height:100%}
+  body{margin:0;display:flex;flex-direction:column;height:100dvh;background:var(--paper,#FFF7EC);font-family:var(--body,system-ui);color:var(--ink,#2B1A12)}
+  header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(43,26,18,.12)}
+  h1{font-size:18px;margin:0;font-weight:800}
+  header p{margin:0;font-size:13.5px;max-width:560px}
+  .tabs{display:flex;gap:6px}
+  .tabs button{min-height:40px;border-radius:999px;border:2px solid #2B1A12;background:#fff;font:800 14px inherit;padding:0 14px;cursor:pointer}
+  .tabs button[aria-selected=true]{background:#2B1A12;color:#fff}
+  .phones{display:grid;grid-template-columns:1fr;flex:1;min-height:0}
+  @media (max-width:859px){header p .long{display:none}header{padding:8px 12px}}
+  .dev{display:none;flex-direction:column;min-height:0}
+  .dev.on{display:flex}
+  .dev .lbl{font-size:12.5px;font-weight:800;text-align:center;padding:4px;letter-spacing:.04em;text-transform:uppercase}
+  iframe{border:0;width:100%;flex:1;min-height:0;background:#fff}
+  a{color:inherit;font-weight:700}
+  @media (min-width:860px){
+    .tabs{display:none}
+    .phones{grid-template-columns:repeat(2,390px);justify-content:center;gap:36px;height:auto;padding:18px;flex:none}
+    .dev{display:flex}
+    iframe{height:min(760px,calc(100dvh - 150px));flex:none;border:10px solid #2B1A12;border-radius:44px;box-sizing:border-box}
+  }
+</style>
+<script type="module" src="/analytics.js"></script>
+</head>
+<body>
+<header>
+  <div><h1>Apart, two phones</h1><p>Two simulated devices, one shared room.<span class="long"> Type on either phone; each person also gets private Bun notes the other never sees.</span> <a href="/chat/">Back to Chat</a></p></div>
+  <div class="tabs" role="tablist" aria-label="Which phone">
+    <button role="tab" id="tA" aria-selected="true" aria-controls="dA">Phone A</button>
+    <button role="tab" id="tB" aria-selected="false" aria-controls="dB">Phone B</button>
+  </div>
+</header>
+<main class="phones">
+  <section class="dev on" id="dA" role="tabpanel" aria-labelledby="tA"><div class="lbl">Phone A</div><iframe id="fA" title="Partner A's phone"></iframe></section>
+  <section class="dev" id="dB" role="tabpanel" aria-labelledby="tB"><div class="lbl">Phone B</div><iframe id="fB" title="Partner B's phone"></iframe></section>
+</main>
+<script>
+  const q = new URLSearchParams(location.search);
+  let room = q.get('room');
+  if (!room) { room = Math.random().toString(36).slice(2, 8); history.replaceState(null, '', '?room=' + room); }
+  const src = as => `/chat/?room=${encodeURIComponent(room)}&as=${as}&duo=1`;
+  document.getElementById('fA').src = src('A');
+  setTimeout(() => { document.getElementById('fB').src = src('B'); }, 900); // let A create the room first
+  const pick = w => { for (const k of ['A', 'B']) { document.getElementById('t' + k).setAttribute('aria-selected', k === w); document.getElementById('d' + k).classList.toggle('on', k === w); } };
+  document.getElementById('tA').onclick = () => pick('A');
+  document.getElementById('tB').onclick = () => pick('B');
+</script>
+</body>
+</html>

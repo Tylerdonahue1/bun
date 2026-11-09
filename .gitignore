@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.env
+.env.*
+!.env.example
+.admin-key
+**/.admin-key
+shots/
+.DS_Store
+*.log
