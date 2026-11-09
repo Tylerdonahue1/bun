@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "redirects": [
-    { "source": "/", "destination": "https://bun.coach/app/", "permanent": true },
-    { "source": "/:path*", "destination": "https://bun.coach/:path*", "permanent": true }
+    { "source": "/", "destination": "https://bun.coach/app/", "statusCode": 301 },
+    { "source": "/:path*/", "destination": "https://bun.coach/:path*/", "statusCode": 301 },
+    { "source": "/:path*", "destination": "https://bun.coach/:path*", "statusCode": 301 }
   ]
 }

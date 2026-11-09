@@ -101,4 +101,4 @@ Keep this project only as a redirect. Point it at `apps/legacy-redirect`.
 | Output Directory | empty |
 | Production domain | the existing `simmer-prototype.vercel.app` only. bun.coach stays on bun-coach-landing |
 
-`apps/legacy-redirect/vercel.json` sends `301`s. `/` goes to `https://bun.coach/app/`. Every other path keeps its path and query on `https://bun.coach` (`/chat/?room=abc` becomes `https://bun.coach/chat/?room=abc`). Do this after bun.coach is serving the combined site.
+`apps/legacy-redirect/vercel.json` sends `301`s. `trailingSlash` is left unset so Vercel does not answer slash URLs with its own `308` on this host. `/` goes to `https://bun.coach/app/`. A path that ends in `/` keeps that slash (`/app/` and `/demo/` stay slash URLs on bun.coach). A path without a slash keeps that shape (`/chat/duo.html` stays without a trailing slash). The query string is left off the destination, so Vercel forwards it (`/chat/?x=1` becomes `https://bun.coach/chat/?x=1`). Do this after bun.coach is serving the combined site.
