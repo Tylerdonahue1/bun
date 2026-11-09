@@ -29,6 +29,29 @@ test('combined site: landing at /, prototype routes beside it, one analytics tag
   assert.match(app, /src="\/analytics\.js"/);
 });
 
+test('Permissions-Policy allows the microphone on this origin', () => {
+  const expected = 'camera=(), microphone=(self), geolocation=()';
+  const configs = [];
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name === 'site' || entry.name === '.git') continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name === 'vercel.json') configs.push(full);
+    }
+  }
+  walk(repo);
+  assert.ok(configs.length >= 1);
+  for (const file of configs) {
+    const text = fs.readFileSync(file, 'utf8');
+    assert.equal(text.includes('microphone=()'), false, file);
+    if (text.includes('Permissions-Policy')) {
+      const policy = JSON.parse(text).headers.flatMap(group => group.headers).find(header => header.key === 'Permissions-Policy');
+      assert.equal(policy.value, expected, file);
+    }
+  }
+});
+
 test('api entrypoints do not share names, and blob prefixes stay apart', () => {
   const names = fs.readdirSync(path.join(repo, 'api')).filter(name => name.endsWith('.js')).sort();
   assert.deepEqual(names, ['coach.js', 'lead.js', 'leads.js', 'room.js']);
