@@ -1,5 +1,6 @@
 // POST /api/lead : store one waitlist lead (email + optional name/partner + quiz answers + result type)
-// in the private Vercel Blob store "bun-coach-leads" (BLOB_READ_WRITE_TOKEN is a server-only env var).
+// in the private Vercel Blob store (BLOB_READ_WRITE_TOKEN). Paths stay under leads/.
+// The prototype's Apart rooms use rooms/ and can share this token.
 // Guards: honeypot field, minimum time-on-page, strict email check, whitelisted answers, per-IP rate limit.
 import { score } from '../lib/quiz.js';
 import { deliverLead } from '../lib/resend-sync.js';

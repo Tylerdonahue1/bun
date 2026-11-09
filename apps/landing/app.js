@@ -85,7 +85,7 @@ function renderResult() {
   ${state.joined ? `<div class="say"><span data-bun="54"></span><p class="bubble">You’re on the early-access list. I’ll come find you when I’m ready. 🫶</p></div>` : `<button class="btn big fight" id="res-join">Get early access to Bun</button>`}
   <div class="row"><button class="btn" id="share">Share our type</button><button class="btn ghost" id="retake">Retake</button></div>
   <p class="fine center-t">Sharing sends only your type, never your answers. This quiz is just for fun: it isn’t a diagnosis, and no type is better than another.</p>
-  <a class="link center-self" href="https://simmer-prototype.vercel.app/" target="_blank" rel="noopener">Peek at the prototype →</a>`;
+  <a class="link center-self" href="/app/">Peek at the prototype →</a>`;
   paintBuns($('#result'));
   $('#share').onclick = () => shareType(s.type);
   $('#retake').onclick = start;

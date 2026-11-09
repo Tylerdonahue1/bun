@@ -1,91 +1,104 @@
 # Simmer / Bun
 
-Simmer is an AI couples-coaching web app. Bun is the coach. This repository holds the working prototype and the bun.coach landing page. Each one deploys as its own Vercel project.
+Simmer is an AI couples-coaching web app. Bun is the coach. One Vercel project serves both the bun.coach landing page and the working prototype.
 
-The repository started as a one-line README. Both apps now live under `apps/`, with the same files and `api/` routes they had when they were deployed on their own.
+Source stays split so each app can still be run and tested on its own:
 
-## Layout
+- `apps/landing/` is the landing page, quiz, and waitlist. On the combined site it is `https://bun.coach/`.
+- `apps/prototype/` is the working prototype. On the combined site it is `https://bun.coach/app/`, plus `/chat/`, `/demo/`, and `/shared/`. Its own `index.html` (a redirect to `/app/`) is only for the standalone dev server. The bun.coach deploy does not ship that file, so `/` stays the landing page.
+- `api/` at the repo root re-exports the handlers: `lead` and `leads` from the landing app, `coach` and `room` from the prototype. The names do not overlap.
+- `npm run build` copies static files into `site/`. Favicons, `analytics.js`, and `vendor/vercel-analytics.js` are the same bytes in both apps, so the site keeps one of each. Server-only landing files (`lib/resend-sync.js`, `lib/welcome-email.js`) are not copied into `site/`.
 
-- `apps/prototype/` is the working prototype: static HTML and JS, plus Vercel functions in `api/` (`api/coach.js` calls Vercel AI Gateway, `api/room.js` stores Apart-mode rooms). Live at https://simmer-prototype.vercel.app. `/` redirects to `/app/`. Notes on the product are in `apps/prototype/STATUS.md` and `apps/prototype/FIGHT-MODEL.md`.
-- `apps/landing/` is the bun.coach landing page: quiz, waitlist, and lead export. Live at https://bun.coach. Details are in `apps/landing/README.md`.
-
-Each app is self-contained. Serverless functions stay in that app's `api/` directory, which is what Vercel detects when the app folder is the project root.
+`https://bun.coach/app/` is already linked from the landing page (“Try the prototype”, “Peek at the prototype”).
 
 ## Run locally
 
-Install and start each app from its own directory. Node.js 22.
-
-Prototype (http://localhost:4321):
+Node.js 22. Install each app before its tests or dev server. The repo root install is what Vercel uses for the functions.
 
 ```bash
-cd apps/prototype
 npm install
-npm run dev
+npm install --prefix apps/landing
+npm install --prefix apps/prototype
 ```
 
 Landing (http://localhost:4400):
 
 ```bash
-cd apps/landing
-npm install
-npm run dev
+npm run dev --prefix apps/landing
 ```
 
-Lead capture on the landing page returns 503 until `BLOB_READ_WRITE_TOKEN` is set in the environment. The prototype coach returns 503 until an AI Gateway credential is available.
+Prototype (http://localhost:4321). In this server only, `/` redirects to `/app/`.
+
+```bash
+npm run dev --prefix apps/prototype
+```
+
+Combined static site, after `npm run build`, is the `site/` directory. Lead capture returns 503 until `BLOB_READ_WRITE_TOKEN` is set. The coach returns 503 until an AI Gateway credential is available.
 
 ## Tests
 
 ```bash
-cd apps/prototype && npm test
-cd apps/landing && npm test
+npm test
 ```
 
-Optional checks, not part of `npm test`:
-
-- Landing browser pass: from `apps/landing`, `BASE=https://bun.coach node test/e2e.mjs` (needs Puppeteer). Screenshots go to `shots/`.
-- Prototype live red-team: from `apps/prototype`, `npm run redteam`. This calls AI Gateway.
+That builds a throwaway copy of the combined site and runs both apps’ tests. You can still run `npm test` inside `apps/landing` or `apps/prototype`.
 
 ## Environment variables
 
-Set these in the Vercel project. The repo has no `.env` files. Names only:
+Set these on the **bun-coach-landing** project. One Blob token is enough: leads are stored under `leads/` and Apart-mode rooms under `rooms/`. Those prefixes do not overlap. If the prototype was using a different Blob store, its old rooms stay there; new rooms are written to whichever store this token points at.
 
-**Prototype** (`simmer-prototype`)
+Copy from **simmer-prototype** if they are set there:
 
-- `AI_GATEWAY_API_KEY`, when the project calls AI Gateway with an API key
-- `VERCEL_OIDC_TOKEN`, when the project calls AI Gateway with OIDC. On Vercel the coach route also accepts the `x-vercel-oidc-token` request header
-- `BLOB_READ_WRITE_TOKEN`, optional, for durable Apart-mode rooms. Without it, rooms stay in function memory
-- `SIMMER_MODEL` and `SIMMER_FALLBACK_MODEL`, optional model overrides
-- `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`), optional room store used instead of Blob when set
+- `AI_GATEWAY_API_KEY` (skip this if that project calls AI Gateway with OIDC; on bun-coach-landing, OIDC is available as the `x-vercel-oidc-token` request header once AI Gateway is enabled for the project)
+- `BLOB_READ_WRITE_TOKEN` only if you want prototype rooms in a store other than the landing leads store. If you use the landing token for both, do not also set a second token; there is one variable
+- `SIMMER_MODEL` and `SIMMER_FALLBACK_MODEL`
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`). When these are set, rooms use KV instead of Blob
 
-**Landing** (`bun-coach-landing`)
+Already on **bun-coach-landing**, keep them:
 
-- `BLOB_READ_WRITE_TOKEN`, private Blob store for leads
-- `LEADS_ADMIN_KEY`, required header for `GET` and `DELETE /api/leads` (24 characters or more)
-- `RESEND_API_KEY`, sending-only key for the welcome email (`Bun from Simmer <hello@bun.coach>`)
-- `RESEND_CONTACTS_API_KEY`, a full-access key for contacts. The sending-only key cannot create contacts
-- `RESEND_AUDIENCE_ID`, the waitlist segment id (Resend segments replaced audiences)
-- `RESEND_CONTACTS_ENABLED=true` to upsert contacts, `WELCOME_EMAIL_ENABLED=true` to send the note. Both stay off until set. `WELCOME_EMAIL_ALLOW_TEST=true` includes `test+…@example.com`
+- `BLOB_READ_WRITE_TOKEN` (leads, and rooms when KV is not set)
+- `LEADS_ADMIN_KEY`
+- `RESEND_API_KEY` (sending-only; From `Bun from Simmer <hello@bun.coach>`)
+- `RESEND_CONTACTS_API_KEY` (full-access; the sending-only key cannot create contacts)
+- `RESEND_AUDIENCE_ID` (segment id of the bun.coach waitlist)
+- `RESEND_CONTACTS_ENABLED=true` and `WELCOME_EMAIL_ENABLED=true` when those features should turn on. Both stay off until set. `WELCOME_EMAIL_ALLOW_TEST=true` includes `test+…@example.com`
 
-## Vercel
+## Vercel: bun-coach-landing
 
-Connect the GitHub repo `Tylerdonahue1/bun` to the two existing projects. Set the root directory before the first production deploy from Git, so Vercel builds the app folder.
+This is the only project that serves bun.coach. Connect the GitHub repo `Tylerdonahue1/bun`.
 
-| Project | Root Directory | Production |
-| --- | --- | --- |
-| `simmer-prototype` | `apps/prototype` | https://simmer-prototype.vercel.app |
-| `bun-coach-landing` | `apps/landing` | https://bun.coach |
+| Setting | Value |
+| --- | --- |
+| Root Directory | repository root (empty, or `.`) |
+| Framework Preset | Other |
+| Build Command | `npm run build` |
+| Output Directory | `site` |
+| Install Command | `npm install` |
+| Node.js Version | 22.x |
+| Include source files outside the Root Directory | off |
 
-For both projects:
+`vercel.json` at the repo root sets the same build command, output directory, and framework. Web Analytics stays enabled on this project. Each page loads `/analytics.js` once.
 
-- Framework Preset: **Other**. Each app's `vercel.json` sets `"framework": null`, which is that preset.
-- Build Command: empty. There is no build step. `postinstall` copies the analytics browser build into `vendor/`.
-- Output Directory: empty (the app directory itself).
-- Install Command: `npm install` (the default).
-- Node.js Version: **22.x**.
-- Leave "Include source files outside of the Root Directory" off.
+Production routes:
 
-Environment variables already stored on each Vercel project stay there. Web Analytics has to be enabled on each project (Analytics tab). After this repo is deployed, `/analytics.js` calls `inject()` from `@vercel/analytics`, which requests `/_vercel/insights/script.js` on that same deployment. Vercel serves that script when Web Analytics is enabled.
+| URL | Source |
+| --- | --- |
+| `https://bun.coach/` | `apps/landing` |
+| `https://bun.coach/app/` | `apps/prototype/app` |
+| `https://bun.coach/chat/`, `/demo/`, `/shared/` | prototype |
+| `https://bun.coach/api/lead`, `/api/leads` | landing |
+| `https://bun.coach/api/coach`, `/api/room` | prototype |
 
-## Analytics
+## Vercel: simmer-prototype
 
-These are static HTML apps, so the browser cannot import `node_modules`. `scripts/sync-analytics.mjs` copies `@vercel/analytics/dist/index.mjs` to `vendor/vercel-analytics.js`. `analytics.js` imports `inject()` from that file. Every HTML page loads `/analytics.js`. On the landing page, the existing `window.va` queue is still in `index.html`, so quiz and lead events queue before the insights script arrives.
+Keep this project only as a redirect. Point it at `apps/legacy-redirect`.
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | `apps/legacy-redirect` |
+| Framework Preset | Other |
+| Build Command | empty |
+| Output Directory | empty |
+| Production domain | the existing `simmer-prototype.vercel.app` only. bun.coach stays on bun-coach-landing |
+
+`apps/legacy-redirect/vercel.json` sends `301`s. `/` goes to `https://bun.coach/app/`. Every other path keeps its path and query on `https://bun.coach` (`/chat/?room=abc` becomes `https://bun.coach/chat/?room=abc`). Do this after bun.coach is serving the combined site.

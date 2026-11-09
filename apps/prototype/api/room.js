@@ -1,6 +1,7 @@
 // /api/room : tiny shared room store for Apart mode (two devices, one chat).
 // Hot path: in-memory on the warm function instance. Durable copy: Vercel Blob (private store, free Hobby tier)
 // when BLOB_READ_WRITE_TOKEN is set; written only on real changes (not typing), read only on a memory miss.
+// Paths stay under rooms/. The landing waitlist uses leads/ in the same store.
 // Falls back to memory-only if Blob is missing, over quota, or erroring. Upstash/KV REST is used instead if configured.
 import { readJson, rateLimited } from './_lib.js';
 

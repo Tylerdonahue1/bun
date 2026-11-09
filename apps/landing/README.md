@@ -2,7 +2,7 @@
 
 Mobile-first landing page + playful 8-question "what kind of fighters are you two?" quiz with waitlist lead capture.
 
-- **Live:** https://bun.coach (www.bun.coach 308-redirects to it). Vercel project `bun-coach-landing` (`prj_IgBW86EmOBPs2GrHmfjNfzrINKlE`), team tyler-donahues-projects. The `*.vercel.app` URL is behind Vercel Authentication (default); the custom domain is public.
+- **Live:** https://bun.coach (www.bun.coach 308-redirects to it). Vercel project `bun-coach-landing` (`prj_IgBW86EmOBPs2GrHmfjNfzrINKlE`), team tyler-donahues-projects. Production Root Directory is the **repository root**, not this folder. `npm run build` at the repo root copies this app to `site/` for `/`. The `*.vercel.app` URL is behind Vercel Authentication (default); the custom domain is public.
 - **Domain:** bun.coach is registered through Vercel and uses Vercel DNS (ns1/ns2.vercel-dns.com), so no registrar DNS changes are needed.
 - **Stack:** static HTML/CSS/JS (no build) + two Vercel Node functions. Fonts/colors/Bun illustration reused from `simmer-prototype`.
 
@@ -23,7 +23,11 @@ Mobile-first landing page + playful 8-question "what kind of fighters are you tw
 
 Lead record: `created_at, email, first_name, partner_joining (yes|maybe|solo|null), consent_updates, result_type, quiz_complete, answers{style,trigger,when,cool,end,recover,repeat}, source, utm{}, ref (shared type that brought them), is_test, country`.
 
-## Deploy (no CLI token on the box)
+## Deploy
+
+Production is the combined site. See the repo root README for the bun-coach-landing settings (Root Directory = repository root, Output Directory = `site`).
+
+Historical file-upload deploy (no CLI token on the box), landing files only:
 Vercel MCP `upload_file` for each changed file (sha1 + size, base64 body via `$file:`), then `create_deployment` with the full manifest for project `prj_IgBW86EmOBPs2GrHmfjNfzrINKlE`, `target: production`, `projectSettings.framework: null`, `nodeVersion: 22.x`. Don't ship `shots/`, `test/`, `.admin-key`, `README.md`, `dev-server.mjs`.
 
 ## Welcome email
