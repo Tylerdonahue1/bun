@@ -61,8 +61,10 @@ Set these in the Vercel project. The repo has no `.env` files. Names only:
 
 - `BLOB_READ_WRITE_TOKEN`, private Blob store for leads
 - `LEADS_ADMIN_KEY`, required header for `GET` and `DELETE /api/leads` (24 characters or more)
-
-`RESEND_API_KEY` is reserved for the email integration that is coming. Neither app reads it yet.
+- `RESEND_API_KEY`, sending-only key for the welcome email (`Bun from Simmer <hello@bun.coach>`)
+- `RESEND_CONTACTS_API_KEY`, a full-access key for contacts. The sending-only key cannot create contacts
+- `RESEND_AUDIENCE_ID`, the waitlist segment id (Resend segments replaced audiences)
+- `RESEND_CONTACTS_ENABLED=true` to upsert contacts, `WELCOME_EMAIL_ENABLED=true` to send the note. Both stay off until set. `WELCOME_EMAIL_ALLOW_TEST=true` includes `test+…@example.com`
 
 ## Vercel
 
