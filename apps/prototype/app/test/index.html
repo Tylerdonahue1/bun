@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simmer · Test flow</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2B1A12">
+<meta name="description" content="Test page for the 12 Nov 2026 fight-mode flow. Not the live Simmer app.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..900,100,1&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/styles.css">
+<link rel="stylesheet" href="/app/test/flow.css">
+<script type="module" src="/analytics.js"></script>
+</head>
+<body class="test-body">
+<header class="testbar" id="testbar"></header>
+<div class="desk" id="desk">
+  <section class="phone is-on" id="phone-A" data-who="A">
+    <p class="phone-cap"></p>
+    <div class="shell"><main class="screen" data-screen="launch"></main></div>
+  </section>
+  <section class="phone" id="phone-B" data-who="B" hidden>
+    <p class="phone-cap"></p>
+    <div class="shell"><main class="screen" data-screen="launch"></main></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/shared/simmer.js"></script>
+<script src="/shared/speech.js"></script>
+<script src="/app/test/flow-model.js"></script>
+<script src="/app/test/flow.js"></script>
+</body>
+</html>

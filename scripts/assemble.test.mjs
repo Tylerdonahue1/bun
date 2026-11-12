@@ -12,6 +12,7 @@ test('combined site: landing at /, prototype routes beside it, one analytics tag
   assemble(destination);
   const landing = fs.readFileSync(path.join(destination, 'index.html'), 'utf8');
   const app = fs.readFileSync(path.join(destination, 'app/index.html'), 'utf8');
+  const testPage = fs.readFileSync(path.join(destination, 'app/test/index.html'), 'utf8');
   assert.match(landing, /Try the prototype/);
   assert.match(landing, /href="\/app\/"/);
   assert.equal(landing.includes("location.replace('/app/'"), false);
@@ -27,6 +28,12 @@ test('combined site: landing at /, prototype routes beside it, one analytics tag
     assert.equal(tags.length, 1, relative);
   }
   assert.match(app, /src="\/analytics\.js"/);
+  assert.match(app, /src="\/app\/app\.js"/);
+  assert.equal(app.includes('/app/test/flow.js'), false);
+  assert.match(testPage, /Test flow/);
+  assert.match(testPage, /src="\/app\/test\/flow\.js"/);
+  assert.equal(testPage.includes('/app/app.js'), false);
+  assert.equal(testPage.includes('src="/app/core.js"'), false);
 });
 
 test('Permissions-Policy allows the microphone on this origin', () => {
