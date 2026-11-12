@@ -10,24 +10,43 @@ Simmer is **coaching, not therapy**, and it is for adults (18+).
 
 **Core loop:** when a couple is mid-fight, get both partners calmer within minutes without taking sides, then help them talk. Fight mode has three stages:
 
-1. **Wind down.** Get both people back to baseline.
-2. **Talk it through.** Timed turns. Bun reflects each side as "From your side…" and the listener says it back.
+1. **Wind down.** Get both people back to baseline. Together (one phone) or Separately (two phones), then reunite. See the agreed 12 Nov 2026 flow below — it is not built yet.
+2. **Talk it through.** Timed turns. Bun reflects each side as "From your side…" and the listener says it back. The method (what to do in this stage) is fed by wind-down data: Together, three spoken turn-taking questions after "We're calmer"; Separately, each partner's quiz. Choosing Separately is itself a signal that the moment is more intense.
 3. **Seal it.** One small repair, one agreement, an optional reminder, and a log entry.
 
-**Fight-or-chill fork.** Returning users open on "Are we in a fight, or just here to chill?" Fight goes to stage 1. Chill goes to home (reminders, agreements, a daily nudge, small gesture ideas, and a private 1:1 with Bun).
+**Fight-or-chill fork.** Returning users open on "Are we in a fight, or just here to chill?" Fight goes to stage 1. Chill is agreed as future work, not the current design focus (12 Nov 2026). When it exists, Chill goes to home (reminders, agreements, a daily nudge, small gesture ideas, a private 1:1 with Bun, and history for self-reflection).
+
+## Agreed fight-mode flow (12 Nov 2026, not built)
+
+Full notes and transcript: [`meetings/2026-11-12-fight-mode-flow.md`](meetings/2026-11-12-fight-mode-flow.md). Design principle: less text, fewer buttons, fewer things to do during a fight.
+
+1. Launch via a home-screen **widget** (one button; wording is not "Pause", Tyler to choose) **or** "Hey Siri, Start Simmer." Then the fight-or-chill screen.
+2. If Fight: **Together or Separately**, a simple screen with two options and a short voice line from Bun.
+3. **Together** (one phone — whoever started): a second screen, Sit Still vs Walk it Off.
+   - Sit Still: "Press play when you're ready," then a **5-minute** recorded meditation.
+   - Walk it Off: they walk together. "Press start when you're outside," then a **10-minute** timer. Around minute 3–4, a suggestion can pop up (for example, "Name three things you can see out loud").
+   - Comeback: one "We're calmer" click (no dual check-in, no extra Start). An animated beat, then Stage 2 opens. Bun asks **three questions, taking turns**. Those answers feed the method.
+4. **Separately** (two phones): the other partner gets a push to start Bun. "Find a safe space by yourself. Click start when you're ready." Screen title like "Tyler with Bun." Then a quiz (voice or text, same questions; 3 of 5 is enough). The Separately quiz is **different** from Together's three questions, because choosing to separate is a more intense state. After both finish: both tap ready, then Stage 2 continues **automatically on the starter's phone** — do not ask whose phone, that can start a fight.
+5. **Talk it through** is in the design flow through close. AI voice coach, chat window, voice animation.
+
+## Shared history
+
+A **huge component** of the app (12 Nov 2026). After every use, resolved or not, an automatic log is generated ("Simmer was used. Here's the summary") and stored on both phones as a shared history. It is always reachable from a **menu**: search by date and topic. Precise wording and commitments must be kept, so later reflection works. This is meant to replace messy personal Apple Notes.
+
+About **one hour after** a fight, both partners get a follow-up (how do you feel? was it resolved?) that attaches to that fight's log, or a lighter push inviting them to reflect in Chill. Mid-week "log how I feel" when not in a fight is useful but parked.
 
 ## Modes
 
 | Mode | Meaning | Where it lives |
 | --- | --- | --- |
 | Apart | Separate phones, shared group chat with Bun | `/chat/` (older). Two-phone sync is not real yet in `/app/`. |
-| Together | One phone on the table, in person | `/app/` stage 1 (sit still, walk it off) and stage 2 Talk. Also `/chat/`. |
-| Separately | Pass the phone, private questions | `/app/` stage 1 |
+| Together | One phone on the table, in person | `/app/` stage 1 (sit still, walk it off) and stage 2 Talk. Also `/chat/`. Agreed 12 Nov: one phone, whoever started the session. |
+| Separately | Each partner on their own phone, then reunite | `/app/` stage 1. Agreed 12 Nov: push to the other phone, private quiz, then Stage 2 on the starter's phone. (The live app still uses "pass the phone"; the code has not been updated.) |
 | Solo | One partner preps or vents privately | `/app/` Bun tab, and `/chat/` Solo |
 
 ## Voice and instant start
 
-The direction is a live voice coach that can step in as a third party, via a native iOS home-screen or lock-screen widget (one Pause button) and a "Hey Siri, start Simmer" shortcut. A web app can't start instantly mid-fight. On the web, the stand-in is a big Pause button and the `?pause=1` deep link. The prototype speaks through the browser (SpeechSynthesis) and listens through Web Speech.
+The direction is a live voice coach that can step in as a third party, via a native iOS home-screen or lock-screen **widget** (one button; wording TBD, not "Pause") **and** a "Hey Siri, Start Simmer" shortcut — both are launch options (confirmed 12 Nov 2026). Siri may show a lock-screen "Open Simmer or Stop" prompt; try to skip it and go straight into the app, but keep that design until it's proven. A web app can't start instantly mid-fight. On the web, the stand-in is a big Pause button and the `?pause=1` deep link. The prototype speaks through the browser (SpeechSynthesis) and listens through Web Speech.
 
 Use a **capable open-weight model**, not an expensive frontier model. Current models: primary `moonshotai/kimi-k2`, fallback `deepseek/deepseek-v3.1`, via Vercel AI Gateway. A later upgrade to `kimi-k2.6` / `deepseek-v4-pro` is a plan, not done.
 

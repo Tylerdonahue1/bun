@@ -15,6 +15,7 @@ These files are documentation only. They must not be copied into the Vercel site
 | [`DECISIONS.md`](DECISIONS.md) | Dated product and technical decisions | Append only. Never rewrite history; add a superseding entry instead. |
 | [`OPEN.md`](OPEN.md) | Open questions and parked work | Update in place. When something is decided, move it to `DECISIONS.md` with the resolution and remove it from here. |
 | [`journal/YYYY-MM-DD-<name>.md`](journal/) | Session notes | One file per person per day. Append to yours. Never edit someone else's. |
+| [`meetings/YYYY-MM-DD-slug.md`](meetings/) | Shared meeting transcripts, with decisions, flow changes, and to-dos pulled out | New file per meeting, from the template in [`meetings/README.md`](meetings/README.md). Also update the living files above in the same commit. |
 
 Use `tyler` or `iryna` (lowercase) in journal filenames, for example `journal/2026-11-12-tyler.md`.
 
@@ -23,8 +24,12 @@ Use `tyler` or `iryna` (lowercase) in journal filenames, for example `journal/20
 ### At the start of a session
 
 1. `git pull` on `main` (rebase your branch if you have one).
-2. Read `STATE.md`, `OPEN.md`, and today's plus yesterday's journal entries. Skim recent `DECISIONS.md` entries if STATE points to them.
+2. Read `STATE.md`, `OPEN.md`, and today's plus yesterday's journal entries. Skim recent `DECISIONS.md` entries if STATE points to them. If a recent meeting was filed, read that meeting's decisions and to-dos too.
 3. Then do the work your human asked for.
+
+### When a human shares a meeting transcript
+
+Follow [`meetings/README.md`](meetings/README.md) every time, without being asked to repeat the steps: file the meeting, pull out decisions / flow changes / to-dos, update the living files, and commit context-only to `main`.
 
 ### When to write
 
@@ -33,6 +38,7 @@ Don't write after every message. Write after:
 - a product or technical decision,
 - a shipped change (merge, deploy, or a live-site fix),
 - a new open question or a resolved one,
+- a meeting transcript the human shared,
 - the end of a work session that produced anything the other person should know.
 
 ### At the end, or after a meaningful change
@@ -53,13 +59,13 @@ Don't write after every message. Write after:
 ## Never put in this folder
 
 - Secrets, API keys, tokens, env **values**, admin keys, or passwords. Env **names** are fine.
-- Raw chat transcripts. Summarize instead.
+- Raw Grok Bot or private chat transcripts. Summarize those instead. Meeting transcripts the humans share belong in `meetings/`, following [`meetings/README.md`](meetings/README.md). Keep them complete, and note if the source was cut off.
 - Anything about the Moonshots Resend account, or any account that isn't Simmer/Bun.
 - Instructions to email, message, or post to anyone. The humans decide that.
 - Equity, cap-table, or legal-entity discussion.
 
 ## Related files in the repo (don't duplicate them)
 
-- `apps/prototype/FIGHT-MODEL.md` — fight-mode framework. The live code wins if they diverge.
+- `apps/prototype/FIGHT-MODEL.md` — fight-mode framework. The live code wins if they diverge. The 12 Nov 2026 flow meeting supersedes parts of this doc; the live app has not been updated yet. See [`meetings/2026-11-12-fight-mode-flow.md`](meetings/2026-11-12-fight-mode-flow.md).
 - `apps/prototype/STATUS.md` — older build log. Deploy IDs in it may be stale; prefer `STATE.md`.
 - `apps/prototype/api/_lib.js` — the live coach prompt and safety text.
