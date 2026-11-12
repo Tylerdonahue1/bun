@@ -11,6 +11,10 @@ Source stays split so each app can still be run and tested on its own:
 
 `https://bun.coach/app/` is already linked from the landing page (“Try the prototype”, “Peek at the prototype”).
 
+## Shared context
+
+Project context for Tyler and Iryna and their Grok bots lives in `context/`. See `context/README.md` for the protocol. These files are documentation only and are not part of the site build.
+
 ## Run locally
 
 Node.js 22. Install each app before its tests or dev server. The repo root install is what Vercel uses for the functions.
